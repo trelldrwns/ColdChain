@@ -7,7 +7,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/audit`, { credentials: "include" })
+    fetch(`/api/v1/audit`, { credentials: "include" })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setLogs(data);

@@ -13,7 +13,7 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/stats`, { credentials: 'include' })
+    fetch(`/api/v1/stats`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(console.error);

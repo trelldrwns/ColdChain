@@ -9,7 +9,7 @@ export default function CarriersPage() {
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/carriers/performance`, { credentials: "include" })
+    fetch(`/api/v1/carriers/performance`, { credentials: "include" })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setCarriers(data);

@@ -12,6 +12,18 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://coldchain-nwi7.onrender.com/api/:path*'
+      },
+      {
+        source: '/auth/:path*',
+        destination: 'https://coldchain-nwi7.onrender.com/auth/:path*'
+      }
+    ];
+  }
 };
 
 export default nextConfig;

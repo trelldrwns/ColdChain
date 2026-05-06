@@ -7,7 +7,7 @@ export default function AlertsInbox() {
   const [alerts, setAlerts] = useState<any[]>([]);
 
   const fetchAlerts = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/alerts`, { credentials: "include" })
+    fetch(`/api/v1/alerts`, { credentials: "include" })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setAlerts(data);
@@ -18,7 +18,7 @@ export default function AlertsInbox() {
   useEffect(() => {
     fetchAlerts();
 
-    const socket = io(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`, { withCredentials: true });
+    const socket = io(``, { withCredentials: true });
     
     socket.on("telemetry_update", (data) => {
       // If we get an excursion, add it to the top of the alerts list!
@@ -44,7 +44,7 @@ export default function AlertsInbox() {
     // Optimistic UI update
     setAlerts(prev => prev.filter(a => a._id !== id));
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/alerts/${id}/resolve`, {
+      await fetch(`/api/v1/alerts/${id}/resolve`, {
         method: "PATCH",
         credentials: "include"
       });

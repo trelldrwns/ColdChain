@@ -14,7 +14,7 @@ export default function TimelinePage() {
   ]);
 
   useEffect(() => {
-    const socket = io(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`, { withCredentials: true });
+    const socket = io(``, { withCredentials: true });
     
     socket.on("telemetry_update", (data) => {
       setTimelines(prev => prev.map(sensor => {

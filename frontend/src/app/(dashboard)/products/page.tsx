@@ -16,7 +16,7 @@ export default function ProductsPage() {
 
   const fetchProducts = () => {
     setIsLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/products`, { credentials: "include" })
+    fetch(`/api/v1/products`, { credentials: "include" })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setProducts(data);
@@ -32,7 +32,7 @@ export default function ProductsPage() {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/products`, {
+      const res = await fetch(`/api/v1/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
