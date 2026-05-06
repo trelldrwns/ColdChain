@@ -23,11 +23,13 @@ const carriersRouter = require('./routes/carriers');
 // Initialize NoSQL DB
 connectMongo();
 
+const allowedOrigins = ['http://localhost:3000', 'https://cold-chain-livid.vercel.app'];
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -38,7 +40,7 @@ io.on('connection', (socket) => {
   console.log('Frontend connected to WebSockets:', socket.id);
 });
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -62,8 +64,8 @@ app.post('/auth/login', async (req, res) => {
 
     res.cookie('jwt', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true,
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
