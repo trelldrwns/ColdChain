@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Base */
+  --bg-page:        #F4F6F9;
+  --bg-surface:     #FFFFFF;
+  --bg-muted:       #EEF0F4;
+
+  /* Frosted glass */
+  --glass-bg:       rgba(255, 255, 255, 0.72);
+  --glass-border:   rgba(255, 255, 255, 0.55);
+
+  /* Sidebar */
+  --sidebar-bg:     #0C1929;
+  --sidebar-active: rgba(14, 165, 176, 0.18);
+  --sidebar-text:   #8FA3B8;
+  --sidebar-icon:   #FFFFFF;
+
+  /* Accent */
+  --accent:         #0EA5B0;
+  --accent-light:   #E0F5F7;
+  --accent-dark:    #0A7D86;
+
+  /* Semantic */
+  --ok:             #22C55E;
+  --ok-light:       #DCFCE7;
+  --warn:           #F59E0B;
+  --warn-light:     #FEF3C7;
+  --danger:         #E84444;
+  --danger-light:   #FEE2E2;
+  --info:           #3B82F6;
+  --info-light:     #DBEAFE;
+
+  /* Text */
+  --text-primary:   #141820;
+  --text-secondary: #5C6470;
+  --text-muted:     #9EA8B5;
+
+  /* Borders */
+  --border:         rgba(0, 0, 0, 0.07);
+  --border-strong:  rgba(0, 0, 0, 0.13);
+  
+  /* Radii */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card:   0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.05);
+  --shadow-panel:  0 8px 32px rgba(0,0,0,0.10);
+  --shadow-float:  0 2px 8px rgba(0,0,0,0.08);
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+}
+
+@layer utilities {
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(160%);
+    border-left: 1px solid var(--glass-border);
+  }
+}
