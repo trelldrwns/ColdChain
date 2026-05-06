@@ -16,7 +16,7 @@ export default function PublicTrackingPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/track/${trackingNo}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/track/${trackingNo}`)
       .then(res => {
         if (!res.ok) throw new Error("Tracking number not found");
         return res.json();

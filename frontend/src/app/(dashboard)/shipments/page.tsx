@@ -15,7 +15,7 @@ export default function ShipmentsPage() {
 
   const fetchShipments = () => {
     setIsLoadingList(true);
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/shipments`, {credentials: 'include'})
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/shipments`, {credentials: 'include'})
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setShipments(data);
@@ -34,7 +34,7 @@ export default function ShipmentsPage() {
   useEffect(() => {
     if (selectedId) {
       setIsLoadingDetails(true);
-      fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/shipments/${selectedId}`, {credentials: 'include'})
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/shipments/${selectedId}`, {credentials: 'include'})
         .then(res => res.json())
         .then(data => {
           setDetailData(data);
@@ -50,7 +50,7 @@ export default function ShipmentsPage() {
   }, [selectedId]);
 
   const handleUpdateStatus = (id: string, newStatus: string) => {
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/shipments/${id}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/shipments/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

@@ -7,7 +7,7 @@ export default function PrintReportPage() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/shipments/${id}`, { credentials: "include" })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/shipments/${id}`, { credentials: "include" })
       .then(res => res.json())
       .then(d => {
         setData(d);

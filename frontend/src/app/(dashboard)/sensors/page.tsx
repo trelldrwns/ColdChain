@@ -13,7 +13,7 @@ export default function SensorsPage() {
 
   const fetchSensors = () => {
     setIsLoading(true);
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/sensors`, {credentials: 'include'})
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/sensors`, {credentials: 'include'})
       .then(res => res.json())
       .then(data => {
         if(Array.isArray(data)) setSensors(data);
@@ -26,7 +26,7 @@ export default function SensorsPage() {
   };
 
   const fetchShipments = () => {
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/shipments`, {credentials: 'include'})
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/shipments`, {credentials: 'include'})
       .then(res => res.json())
       .then(data => {
         if(Array.isArray(data)) setShipments(data);
@@ -38,7 +38,7 @@ export default function SensorsPage() {
     fetchSensors();
     fetchShipments();
 
-    const socket = io(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}`, { withCredentials: true });
+    const socket = io(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`, { withCredentials: true });
     
     socket.on("telemetry_update", (data) => {
       setSensors(prev => prev.map(s => {
@@ -59,14 +59,14 @@ export default function SensorsPage() {
   }, []);
 
   const handleCalibrate = (id: string) => {
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/sensors/${id}/calibrate`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/sensors/${id}/calibrate`, {
       method: 'PATCH',
       credentials: 'include'
     }).then(() => fetchSensors()).catch(console.error);
   };
 
   const handleUpdateSensor = (id: string, payload: any) => {
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/sensors/${id}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/sensors/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -87,7 +87,7 @@ export default function SensorsPage() {
                 return;
               }
               toast.loading("Inducing thermal shock...", { id: 'chaos' });
-              fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/telemetry/ingest`, {
+              fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/telemetry/ingest`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "X-Hardware-Token": "cc-hw-sk-9942a1" },
                 body: JSON.stringify({

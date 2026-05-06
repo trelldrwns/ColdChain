@@ -20,13 +20,13 @@ export default function NewShipmentModal({ isOpen, onClose, onSuccess }: { isOpe
     if (isOpen) {
       setTrackingNo(`TRK-${Math.floor(1000 + Math.random() * 9000)}`);
       // Fetch available products
-      fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/products`, { credentials: "include" })
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/products`, { credentials: "include" })
         .then(res => res.json())
         .then(data => { if(Array.isArray(data)) setProducts(data); })
         .catch(console.error);
 
       // Fetch unassigned sensors
-      fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/sensors?unassigned=true`, { credentials: "include" })
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/sensors?unassigned=true`, { credentials: "include" })
         .then(res => res.json())
         .then(data => { if(Array.isArray(data)) setSensors(data); })
         .catch(console.error);
@@ -48,7 +48,7 @@ export default function NewShipmentModal({ isOpen, onClose, onSuccess }: { isOpe
     };
 
     try {
-      const res = await fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/shipments`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/shipments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -9,7 +9,7 @@ export default function TelemetryChart({ shipmentId, minTemp, maxTemp }: { shipm
   useEffect(() => {
     if (!shipmentId) return;
     setLoading(true);
-    fetch(`\${process.env.NEXT_PUBLIC_API_URL || `\${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`}/api/v1/telemetry/history/${shipmentId}`, { credentials: 'include' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/telemetry/history/${shipmentId}`, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (Array.isArray(result)) {
