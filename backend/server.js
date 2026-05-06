@@ -58,7 +58,7 @@ app.post('/auth/login', async (req, res) => {
 
     const token = jwt.sign(
       { sub: user.id, email: user.email, role: user.role, name: user.name },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'coldchain_fallback_secret_key_2026',
       { expiresIn: '24h' }
     );
 
