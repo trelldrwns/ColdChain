@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const jwt = request.cookies.get('jwt');
   
   // Protect all dashboard routes
-  const protectedRoutes = ['/dashboard', '/shipments', '/sensors', '/timeline'];
+  const protectedRoutes = ['/dashboard', '/shipments', '/sensors', '/timeline', '/carriers', '/products', '/settings'];
   const isProtected = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route));
 
   if (isProtected && !jwt) {
@@ -27,5 +27,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/shipments/:path*', '/sensors/:path*', '/timeline/:path*', '/login'],
+  matcher: ['/', '/dashboard/:path*', '/shipments/:path*', '/sensors/:path*', '/timeline/:path*', '/carriers/:path*', '/products/:path*', '/settings/:path*', '/login'],
 };
