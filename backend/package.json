@@ -12,6 +12,7 @@
   "type": "commonjs",
   "dependencies": {
     "@influxdata/influxdb-client": "^1.35.0",
+    "@supabase/supabase-js": "^2.105.3",
     "axios": "^1.16.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",

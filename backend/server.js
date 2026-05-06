@@ -5,7 +5,12 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcrypt');
+
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wdbgvttgojmcmphmzhgq.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkYmd2dHRnb2ptY21waG16aGdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODM3NjAsImV4cCI6MjA5MzY1OTc2MH0.kaOenYR7H0JC78sicUEReJKeLQQRYx4sQX8w4HJAsvc';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const { query } = require('./db');
 const { connectMongo } = require('./mongo');
 const { authenticateToken, requireRole } = require('./middleware/auth');
@@ -48,28 +53,29 @@ app.use(cookieParser());
 app.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const result = await query('SELECT id, email, name, role, password_hash FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-    const user = result.rows[0];
-    const validPassword = await bcrypt.compare(password, user.password_hash);
-    
-    if (!validPassword) return res.status(401).json({ error: 'Invalid credentials' });
+    if (error) return res.status(401).json({ error: error.message });
 
-    const token = jwt.sign(
-      { sub: user.id, email: user.email, role: user.role, name: user.name },
-      process.env.JWT_SECRET || 'coldchain_fallback_secret_key_2026',
-      { expiresIn: '24h' }
-    );
-
-    res.cookie('jwt', token, {
+    // Store the Supabase access token in the secure HTTP-only cookie
+    res.cookie('jwt', data.session.access_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
-    res.json({ message: 'Logged in successfully', user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+    const userObj = {
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.user_metadata?.name || 'Admin',
+      role: data.user.user_metadata?.role || 'admin'
+    };
+
+    res.json({ message: 'Logged in successfully', user: userObj });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: `Server error: ${err.message}` });
