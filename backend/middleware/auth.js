@@ -18,6 +18,7 @@ const authenticateToken = async (req, res, next) => {
 
   req.user = { 
     id: user.id, 
+    sub: user.id,
     email: user.email, 
     role: user.user_metadata?.role || 'admin', 
     name: user.user_metadata?.name || 'Admin' 
