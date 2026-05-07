@@ -53,7 +53,7 @@ router.get('/', applyShipmentFilter, async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: err.message || 'Server error' });
   }
 });
 
@@ -95,7 +95,7 @@ router.get('/:id', applyShipmentFilter, async (req, res) => {
     res.json(shipment);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: err.message || 'Server error' });
   }
 });
 
@@ -136,7 +136,7 @@ router.patch('/:id', applyShipmentFilter, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: err.message || 'Server error' });
   }
 });
 
@@ -174,7 +174,36 @@ router.post('/', applyShipmentFilter, async (req, res) => {
     res.status(201).json(shipment);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to create shipment' });
+    res.status(500).json({ error: err.message || 'Failed to create shipment' });
+  }
+});
+
+// DELETE /shipments/:id
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // We should delete shipment products and free up sensors first, then delete the shipment itself
+    // Actually we can just update sensor active status
+    const shipmentSensorsRes = await query(`SELECT sensor_id FROM shipment_sensors WHERE shipment_id = $1`, [id]);
+    const sensorIds = shipmentSensorsRes.rows.map(r => r.sensor_id);
+    
+    if (sensorIds.length > 0) {
+      await query(`UPDATE sensors SET active = false WHERE id = ANY($1)`, [sensorIds]);
+    }
+    
+    // Deleting the shipment will cascade delete shipment_products and shipment_sensors if ON DELETE CASCADE is set
+    // If not, we do it manually:
+    await query(`DELETE FROM shipment_products WHERE shipment_id = $1`, [id]);
+    await query(`DELETE FROM shipment_sensors WHERE shipment_id = $1`, [id]);
+    await query(`DELETE FROM shipments WHERE id = $1`, [id]);
+    
+    // Also log audit
+    await logAudit(req.user.sub, 'DELETE_SHIPMENT', 'shipment', id, { id });
+    
+    res.json({ success: true, message: 'Shipment deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Server error' });
   }
 });
 

@@ -4,6 +4,7 @@ import StatusPill from "@/components/StatusPill";
 import { Map, X, Download } from 'lucide-react';
 import NewShipmentModal from "@/components/NewShipmentModal";
 import TelemetryChart from "@/components/TelemetryChart";
+import toast from 'react-hot-toast';
 
 export default function ShipmentsPage() {
   const [shipments, setShipments] = useState<any[]>([]);
@@ -50,23 +51,51 @@ export default function ShipmentsPage() {
   }, [selectedId]);
 
   const handleUpdateStatus = (id: string, newStatus: string) => {
-    fetch(`/api/v1/shipments/${id}`, {
+    const updatePromise = fetch(`/api/v1/shipments/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ status: newStatus })
-    })
-    .then(res => {
-      if (res.ok) {
-        fetchShipments(); // refresh list
-        setDetailData((prev: any) => ({ 
-          ...prev, 
-          status: newStatus,
-          events: newStatus === 'in_transit' ? [] : prev.events 
-        })); // update detail panel and clear logs
+    }).then(async res => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to update status');
       }
-    })
-    .catch(console.error);
+      fetchShipments(); // refresh list
+      setDetailData((prev: any) => ({ 
+        ...prev, 
+        status: newStatus,
+        events: newStatus === 'in_transit' ? [] : prev.events 
+      })); // update detail panel and clear logs
+    });
+
+    toast.promise(updatePromise, {
+      loading: 'Updating status...',
+      success: `Shipment marked as ${newStatus.replace('_', ' ')}`,
+      error: (err) => `Error: ${err.message}`
+    });
+  };
+
+  const handleDeleteShipment = (id: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this trip? This action cannot be undone.")) return;
+    
+    const deletePromise = fetch(`/api/v1/shipments/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    }).then(async res => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to delete record');
+      }
+      setSelectedId(null);
+      fetchShipments();
+    });
+
+    toast.promise(deletePromise, {
+      loading: 'Deleting record...',
+      success: 'Trip permanently deleted',
+      error: (err) => `Error: ${err.message}`
+    });
   };
 
   const handleDownloadReport = (id: string) => {
@@ -252,6 +281,23 @@ export default function ShipmentsPage() {
                   </div>
                 )}
 
+                {detailData.status === 'in_transit' && (
+                  <div className="pt-4 flex gap-3">
+                    <button 
+                      onClick={() => handleUpdateStatus(detailData.id, 'delivered')}
+                      className="flex-1 py-3 bg-surface border border-ok text-[#15803D] font-medium text-sm rounded-xl hover:bg-ok hover:text-white transition-colors"
+                    >
+                      Mark Delivered
+                    </button>
+                    <button 
+                      onClick={() => handleUpdateStatus(detailData.id, 'flagged')}
+                      className="flex-1 py-3 bg-surface border border-danger text-danger font-medium text-sm rounded-xl hover:bg-danger hover:text-white transition-colors"
+                    >
+                      Flag Anomaly
+                    </button>
+                  </div>
+                )}
+
                 {detailData.status === 'flagged' && (
                   <div className="pt-4 flex gap-3">
                     <button 
@@ -265,6 +311,25 @@ export default function ShipmentsPage() {
                       className="flex-1 py-3 bg-surface border border-danger text-danger font-medium text-sm rounded-xl hover:bg-danger hover:text-white transition-colors"
                     >
                       Halt Trip
+                    </button>
+                  </div>
+                )}
+
+                {(detailData.status === 'cancelled' || detailData.status === 'delivered') && (
+                  <div className="pt-4 flex flex-col gap-3">
+                    {detailData.status === 'cancelled' && (
+                      <button 
+                        onClick={() => handleUpdateStatus(detailData.id, 'pending')}
+                        className="w-full py-3 bg-accent text-white font-medium text-sm rounded-xl hover:bg-accent-dark transition-colors"
+                      >
+                        Reinitialize Trip
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => handleDeleteShipment(detailData.id)}
+                      className="w-full py-3 bg-surface border border-danger text-danger font-medium text-sm rounded-xl hover:bg-danger hover:text-white transition-colors"
+                    >
+                      Delete Record
                     </button>
                   </div>
                 )}
