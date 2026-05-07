@@ -91,6 +91,12 @@ app.get('/auth/me', authenticateToken, (req, res) => {
   res.json({ user: req.user });
 });
 
+// Logout endpoint to clear the HttpOnly cookie
+app.get('/auth/logout', (req, res) => {
+  res.clearCookie('jwt', { path: '/', httpOnly: true, secure: true, sameSite: 'none' });
+  res.json({ message: 'Logged out successfully' });
+});
+
 // --- API Routes ---
 app.use('/api/v1/shipments', authenticateToken, shipmentsRouter);
 app.use('/api/v1/sensors', authenticateToken, sensorsRouter);

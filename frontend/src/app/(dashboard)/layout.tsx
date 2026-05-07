@@ -75,6 +75,14 @@ export default function DashboardLayout({
             <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-text-secondary">
               <User className="w-4 h-4" />
             </div>
+            <button 
+              onClick={() => {
+                fetch('/auth/logout').then(() => window.location.href = '/login');
+              }}
+              className="ml-4 text-xs font-medium text-danger hover:underline"
+            >
+              Logout
+            </button>
           </div>
         </header>
 
