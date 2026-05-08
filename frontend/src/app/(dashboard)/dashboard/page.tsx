@@ -66,7 +66,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[400px]">
         <div className="bg-surface rounded-[14px] p-6 border border-border lg:col-span-2">
           <h3 className="font-medium text-sm text-text-primary mb-6">Volume & Excursions Overview</h3>
-          <DashboardChart />
+          <DashboardChart stats={stats} />
         </div>
 
         <div className="lg:col-span-1 h-full">

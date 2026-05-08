@@ -1,14 +1,21 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Truck, Navigation, RefreshCw } from "lucide-react";
+import { Truck, Navigation, RefreshCw, Trash2, Plus, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function CarriersPage() {
   const [carriers, setCarriers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  useEffect(() => {
+  // New Carrier State
+  const [isCreating, setIsCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newLicense, setNewLicense] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+
+  const fetchCarriers = () => {
     fetch(`/api/v1/carriers/performance`, { credentials: "include" })
       .then(res => res.json())
       .then(data => {
@@ -16,14 +23,86 @@ export default function CarriersPage() {
         setIsLoading(false);
       })
       .catch(console.error);
+  };
+
+  useEffect(() => {
+    fetchCarriers();
   }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const loadingToast = toast.loading("Adding carrier...");
+    try {
+      const res = await fetch(`/api/v1/carriers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name: newName, license_no: newLicense, contact_email: newEmail })
+      });
+      if (!res.ok) throw new Error("Failed to create");
+      toast.success("Carrier added successfully", { id: loadingToast });
+      setIsCreating(false);
+      setNewName(""); setNewLicense(""); setNewEmail("");
+      fetchCarriers();
+    } catch (err) {
+      toast.error("Failed to add carrier", { id: loadingToast });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to remove this carrier?")) return;
+    setIsDeleting(id);
+    const loadingToast = toast.loading("Removing carrier...");
+    try {
+      const res = await fetch(`/api/v1/carriers/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error("Failed to delete");
+      
+      if (data.hasActiveShipments) {
+        toast.success("Carrier removed. Please assign a new carrier to affected shipments.", { id: loadingToast, duration: 5000 });
+      } else {
+        toast.success("Carrier removed successfully", { id: loadingToast });
+      }
+      fetchCarriers();
+    } catch (err) {
+      toast.error("Failed to remove carrier", { id: loadingToast });
+    } finally {
+      setIsDeleting(null);
+    }
+  };
 
   return (
     <div className="font-ui max-w-5xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold tracking-tight text-text-primary">Carrier Performance</h1>
-        <p className="text-sm text-text-secondary mt-1">Track delivery metrics and integrate with partner dispatch APIs.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-lg font-semibold tracking-tight text-text-primary">Carrier Performance</h1>
+          <p className="text-sm text-text-secondary mt-1">Track delivery metrics and integrate with partner dispatch APIs.</p>
+        </div>
+        <button 
+          onClick={() => setIsCreating(true)}
+          className="bg-accent text-white px-4 py-2 rounded-[10px] text-sm font-semibold hover:bg-accent-dark transition-colors flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" /> Add Carrier
+        </button>
       </div>
+
+      {isCreating && (
+        <div className="bg-surface border border-border rounded-[14px] p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-semibold text-text-primary">New Carrier</h2>
+            <button onClick={() => setIsCreating(false)} className="text-text-muted hover:text-text-primary"><X className="w-5 h-5"/></button>
+          </div>
+          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input required placeholder="Carrier Name" className="bg-background border border-border rounded-[10px] px-4 py-2 text-sm focus:outline-none focus:border-accent" value={newName} onChange={e => setNewName(e.target.value)} />
+            <input required placeholder="License Number" className="bg-background border border-border rounded-[10px] px-4 py-2 text-sm focus:outline-none focus:border-accent" value={newLicense} onChange={e => setNewLicense(e.target.value)} />
+            <input required placeholder="Contact Email" type="email" className="bg-background border border-border rounded-[10px] px-4 py-2 text-sm focus:outline-none focus:border-accent" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
+            <button type="submit" className="bg-text-primary text-white rounded-[10px] px-4 py-2 font-semibold text-sm hover:bg-text-primary/90 transition-colors">Save Carrier</button>
+          </form>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
@@ -40,10 +119,18 @@ export default function CarriersPage() {
                 <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                   <Navigation className="w-5 h-5 text-accent" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="font-semibold text-text-primary text-sm">{c.name}</h3>
                   <p className="font-data text-xs text-text-secondary">{c.license_no}</p>
                 </div>
+                <button 
+                  onClick={() => handleDelete(c.id)}
+                  disabled={isDeleting === c.id}
+                  className="text-text-muted hover:text-danger hover:bg-danger/10 p-2 rounded-md transition-colors"
+                  title="Remove Carrier"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
               
               <div className="grid grid-cols-2 gap-3 mb-4 relative z-10">

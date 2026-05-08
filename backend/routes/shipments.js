@@ -20,10 +20,11 @@ const logAudit = async (userId, action, entityType, entityId, payload) => {
 // GET /shipments
 router.get('/', applyShipmentFilter, async (req, res) => {
   try {
-    let sql = `SELECT s.*, c.name as customer_name, cr.name as carrier_name 
+    let sql = `SELECT s.*, c.name as customer_name, cr.name as carrier_name, sens.serial_no as sensor_serial
                FROM shipments s 
                LEFT JOIN customers c ON s.customer_id = c.id 
-               LEFT JOIN carriers cr ON s.carrier_id = cr.id`;
+               LEFT JOIN carriers cr ON s.carrier_id = cr.id
+               LEFT JOIN sensors sens ON sens.shipment_id = s.id AND sens.active = true`;
     let params = [];
     
     let conditions = [];

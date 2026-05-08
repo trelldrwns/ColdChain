@@ -4,16 +4,25 @@ import { Activity } from 'lucide-react';
 import { io } from "socket.io-client";
 
 export default function TimelinePage() {
-  const [timelines, setTimelines] = useState([
-    { id: 'SN-A9X2B', shipment: 'TRK-10001', statuses: [
-      { type: 'ok', width: 5 }
-    ]},
-    { id: 'SN-B8Y3C', shipment: 'TRK-10002', statuses: [
-      { type: 'ok', width: 5 }
-    ]},
-  ]);
+  const [timelines, setTimelines] = useState<any[]>([]);
 
   useEffect(() => {
+    fetch('/api/v1/shipments?status=in_transit', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const liveTimelines = data
+            .filter((s: any) => s.sensor_serial) // only those with a sensor
+            .map((s: any) => ({
+              id: s.sensor_serial,
+              shipment: s.tracking_no,
+              statuses: [{ type: 'ok', width: 2 }]
+            }));
+          setTimelines(liveTimelines);
+        }
+      })
+      .catch(console.error);
+
     const socket = io(``, { withCredentials: true });
     
     socket.on("telemetry_update", (data) => {

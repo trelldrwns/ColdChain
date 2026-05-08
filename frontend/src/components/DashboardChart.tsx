@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { io } from "socket.io-client";
 
-export default function DashboardChart() {
+export default function DashboardChart({ stats }: { stats?: any }) {
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -11,19 +11,21 @@ export default function DashboardChart() {
     const generateInitialData = () => {
       const now = new Date();
       const initial = [];
+      const activeCount = stats?.activeShipments || 0;
+
       for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getTime() - i * 4 * 60 * 60 * 1000);
         initial.push({
           time: `${d.getHours().toString().padStart(2, '0')}:00`,
-          active: Math.max(2, 12 - i + Math.floor(Math.random() * 4)), // realistic climb
-          excursions: Math.max(0, Math.floor(Math.random() * 2))
+          active: activeCount,
+          excursions: 0
         });
       }
       return initial;
     };
     
     setData(generateInitialData());
-  }, []);
+  }, [stats]);
 
   useEffect(() => {
     const socket = io(``, { withCredentials: true });
@@ -34,10 +36,8 @@ export default function DashboardChart() {
         const newData = [...prev];
         const lastPoint = { ...newData[newData.length - 1] };
         
-        // Slightly fluctuate 'active' to make it look alive
-        if (Math.random() > 0.5) {
-          lastPoint.active = Math.max(0, lastPoint.active + (Math.random() > 0.5 ? 1 : -1));
-        }
+        // We no longer randomly fluctuate active since it's driven by real stats/events
+
 
         // Add excursion if happened
         if (payload.event === 'hard_excursion' || payload.event === 'soft_excursion') {
