@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { X, Package, RadioTower } from "lucide-react";
+import { X, Package, RadioTower, Truck } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function NewShipmentModal({ isOpen, onClose, onSuccess }: { isOpen: boolean, onClose: () => void, onSuccess: () => void }) {

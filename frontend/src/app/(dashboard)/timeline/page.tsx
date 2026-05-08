@@ -75,7 +75,7 @@ export default function TimelinePage() {
             </div>
             
             <div className="relative h-8 bg-muted rounded-[4px] overflow-hidden flex">
-              {sensor.statuses.map((s, i) => {
+              {sensor.statuses.map((s: any, i: number) => {
                 let bgColor = 'bg-[#22C55E] opacity-70'; // ok
                 if (s.type === 'warn') bgColor = 'bg-[#F59E0B] opacity-100';
                 if (s.type === 'danger') bgColor = 'bg-[#E84444] opacity-100';
@@ -86,7 +86,7 @@ export default function TimelinePage() {
               
               {/* Overlay Grid lines for hours */}
               <div className="absolute inset-0 flex justify-between pointer-events-none opacity-20">
-                {[1,2,3,4,5,6].map(i => <div key={i} className="w-px h-full bg-black/50 border-r border-dashed"></div>)}
+                {[1,2,3,4,5,6].map((i: number) => <div key={i} className="w-px h-full bg-black/50 border-r border-dashed"></div>)}
               </div>
             </div>
             
