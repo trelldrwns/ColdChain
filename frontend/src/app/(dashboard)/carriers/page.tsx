@@ -112,9 +112,6 @@ export default function CarriersPage() {
         ) : (
           carriers.map(c => (
             <div key={c.id} className="bg-surface border border-border rounded-[14px] p-5 flex flex-col hover:border-strong transition-colors relative overflow-hidden group">
-              <div className="absolute bottom-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
-                <Truck className="w-16 h-16" />
-              </div>
               <div className="flex items-center gap-3 mb-6 relative z-10">
                 <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                   <Navigation className="w-5 h-5 text-accent" />
@@ -123,6 +120,10 @@ export default function CarriersPage() {
                   <h3 className="font-semibold text-text-primary text-sm">{c.name}</h3>
                   <p className="font-data text-xs text-text-secondary">{c.license_no}</p>
                 </div>
+                
+                {/* Truck icon moved to beside the delete button */}
+                <Truck className="w-6 h-6 text-text-muted opacity-30 group-hover:opacity-60 transition-opacity mr-1" />
+                
                 <button 
                   onClick={() => handleDelete(c.id)}
                   disabled={isDeleting === c.id}

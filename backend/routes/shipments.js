@@ -170,7 +170,7 @@ router.post('/', applyShipmentFilter, async (req, res) => {
     // 3. Assign sensor
     if (sensor_id) {
       await query(`
-        UPDATE sensors SET shipment_id = $1 WHERE id = $2
+        UPDATE sensors SET shipment_id = $1, active = true WHERE id = $2
       `, [shipment.id, sensor_id]);
     }
 

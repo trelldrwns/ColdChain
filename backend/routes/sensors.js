@@ -85,6 +85,12 @@ router.patch('/:id', applyShipmentFilter, async (req, res) => {
     if (shipment_id !== undefined) {
       updates.push(`shipment_id = $${idx++}`);
       params.push(shipment_id || null);
+      
+      // Auto-toggle active state based on assignment if active wasn't explicitly passed
+      if (active === undefined) {
+        updates.push(`active = $${idx++}`);
+        params.push(shipment_id ? true : false);
+      }
     }
     if (active !== undefined) {
       updates.push(`active = $${idx++}`);
