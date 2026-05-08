@@ -103,7 +103,7 @@ router.get('/:id', applyShipmentFilter, async (req, res) => {
 // PATCH /shipments/:id
 router.patch('/:id', applyShipmentFilter, async (req, res) => {
   const { id } = req.params;
-  const { status, assigned_user_id } = req.body;
+  const { status, assigned_user_id, carrier_id } = req.body;
   if (!checkAccess(req, id)) return res.status(403).json({ error: 'Forbidden' });
 
   try {
@@ -115,9 +115,13 @@ router.patch('/:id', applyShipmentFilter, async (req, res) => {
       updates.push(`status = $${paramIndex++}`);
       params.push(status);
     }
-    if (assigned_user_id) {
+    if (assigned_user_id !== undefined) {
       updates.push(`assigned_user_id = $${paramIndex++}`);
       params.push(assigned_user_id);
+    }
+    if (carrier_id !== undefined) {
+      updates.push(`carrier_id = $${paramIndex++}`);
+      params.push(carrier_id);
     }
 
     if (updates.length === 0) return res.json({ message: 'No updates provided' });
@@ -143,14 +147,14 @@ router.patch('/:id', applyShipmentFilter, async (req, res) => {
 
 // POST /shipments
 router.post('/', applyShipmentFilter, async (req, res) => {
-  const { tracking_no, origin, destination, products, sensor_id } = req.body;
+  const { tracking_no, origin, destination, products, sensor_id, carrier_id } = req.body;
   try {
     // 1. Create shipment
     const shipRes = await query(`
-      INSERT INTO shipments (tracking_no, origin, destination, status)
-      VALUES ($1, $2, $3, 'pending')
+      INSERT INTO shipments (tracking_no, origin, destination, status, carrier_id)
+      VALUES ($1, $2, $3, 'pending', $4)
       RETURNING *
-    `, [tracking_no, origin, destination]);
+    `, [tracking_no, origin, destination, carrier_id || null]);
     const shipment = shipRes.rows[0];
 
     // 2. Assign products

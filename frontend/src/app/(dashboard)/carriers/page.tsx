@@ -112,7 +112,7 @@ export default function CarriersPage() {
         ) : (
           carriers.map(c => (
             <div key={c.id} className="bg-surface border border-border rounded-[14px] p-5 flex flex-col hover:border-strong transition-colors relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <div className="absolute bottom-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                 <Truck className="w-16 h-16" />
               </div>
               <div className="flex items-center gap-3 mb-6 relative z-10">

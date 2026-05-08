@@ -13,6 +13,7 @@ export default function ShipmentsPage() {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [isLoadingList, setIsLoadingList] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [carriers, setCarriers] = useState<any[]>([]);
 
   const fetchShipments = () => {
     setIsLoadingList(true);
@@ -30,6 +31,10 @@ export default function ShipmentsPage() {
 
   useEffect(() => {
     fetchShipments();
+    fetch('/api/v1/carriers/performance', {credentials: 'include'})
+      .then(res => res.json())
+      .then(data => { if(Array.isArray(data)) setCarriers(data); })
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -72,6 +77,30 @@ export default function ShipmentsPage() {
     toast.promise(updatePromise, {
       loading: 'Updating status...',
       success: `Shipment marked as ${newStatus.replace('_', ' ')}`,
+      error: (err) => `Error: ${err.message}`
+    });
+  };
+
+  const handleUpdateCarrier = (id: string, newCarrierId: string) => {
+    const updatePromise = fetch(`/api/v1/shipments/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ carrier_id: newCarrierId })
+    }).then(async res => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to update carrier');
+      }
+      fetchShipments(); // refresh list
+      // Refresh detail data
+      const carrier = carriers.find(c => c.id === newCarrierId);
+      setDetailData((prev: any) => ({ ...prev, carrier_id: newCarrierId, carrier_name: carrier?.name || "Unassigned" }));
+    });
+
+    toast.promise(updatePromise, {
+      loading: 'Assigning carrier...',
+      success: 'Carrier assigned successfully',
       error: (err) => `Error: ${err.message}`
     });
   };
@@ -190,7 +219,18 @@ export default function ShipmentsPage() {
                   </div>
                   <div>
                     <div className="text-sm text-text-secondary mb-1">Carrier</div>
-                    <div className="text-sm">{detailData.carrier_name}</div>
+                    {detailData.status === 'pending' ? (
+                      <select 
+                        value={detailData.carrier_id || ""}
+                        onChange={(e) => handleUpdateCarrier(detailData.id, e.target.value)}
+                        className="bg-white border border-border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-accent w-full"
+                      >
+                        <option value="">Select Carrier</option>
+                        {carriers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    ) : (
+                      <div className="text-sm font-medium">{detailData.carrier_name || "No Carrier Assigned"}</div>
+                    )}
                   </div>
                 </div>
 
