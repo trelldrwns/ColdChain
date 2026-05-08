@@ -21,6 +21,10 @@ const nextConfig = {
       {
         source: '/auth/:path*',
         destination: 'https://coldchain-nwi7.onrender.com/auth/:path*'
+      },
+      {
+        source: '/socket.io/:path*',
+        destination: 'https://coldchain-nwi7.onrender.com/socket.io/:path*'
       }
     ];
   }

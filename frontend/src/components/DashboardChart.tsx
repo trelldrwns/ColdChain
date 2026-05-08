@@ -4,20 +4,33 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { io } from "socket.io-client";
 
 export default function DashboardChart() {
-  const [data, setData] = useState([
-    { time: '00:00', active: 4, excursions: 0 },
-    { time: '04:00', active: 6, excursions: 1 },
-    { time: '08:00', active: 10, excursions: 1 },
-    { time: '12:00', active: 15, excursions: 2 },
-    { time: '16:00', active: 12, excursions: 0 },
-    { time: '20:00', active: 8, excursions: 0 },
-  ]);
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Generate recent hours for X-axis dynamically
+    const generateInitialData = () => {
+      const now = new Date();
+      const initial = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getTime() - i * 4 * 60 * 60 * 1000);
+        initial.push({
+          time: `${d.getHours().toString().padStart(2, '0')}:00`,
+          active: Math.max(2, 12 - i + Math.floor(Math.random() * 4)), // realistic climb
+          excursions: Math.max(0, Math.floor(Math.random() * 2))
+        });
+      }
+      return initial;
+    };
+    
+    setData(generateInitialData());
+  }, []);
 
   useEffect(() => {
     const socket = io(``, { withCredentials: true });
     
     socket.on("telemetry_update", (payload) => {
       setData(prev => {
+        if (!prev || prev.length === 0) return prev;
         const newData = [...prev];
         const lastPoint = { ...newData[newData.length - 1] };
         

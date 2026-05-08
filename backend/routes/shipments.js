@@ -182,19 +182,13 @@ router.post('/', applyShipmentFilter, async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    // We should delete shipment products and free up sensors first, then delete the shipment itself
-    // Actually we can just update sensor active status
-    const shipmentSensorsRes = await query(`SELECT sensor_id FROM shipment_sensors WHERE shipment_id = $1`, [id]);
-    const sensorIds = shipmentSensorsRes.rows.map(r => r.sensor_id);
+    // Free up sensors and mark them inactive
+    await query(`UPDATE sensors SET shipment_id = NULL, active = false WHERE shipment_id = $1`, [id]);
     
-    if (sensorIds.length > 0) {
-      await query(`UPDATE sensors SET active = false WHERE id = ANY($1)`, [sensorIds]);
-    }
-    
-    // Deleting the shipment will cascade delete shipment_products and shipment_sensors if ON DELETE CASCADE is set
-    // If not, we do it manually:
+    // Delete shipment products
     await query(`DELETE FROM shipment_products WHERE shipment_id = $1`, [id]);
-    await query(`DELETE FROM shipment_sensors WHERE shipment_id = $1`, [id]);
+    
+    // Delete the shipment
     await query(`DELETE FROM shipments WHERE id = $1`, [id]);
     
     // Also log audit
