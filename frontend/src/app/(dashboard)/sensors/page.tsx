@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import NewSensorModal from "@/components/NewSensorModal";
 import toast from "react-hot-toast";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash } from "lucide-react";
 
 export default function SensorsPage() {
   const [sensors, setSensors] = useState<any[]>([]);
@@ -63,6 +63,26 @@ export default function SensorsPage() {
       method: 'PATCH',
       credentials: 'include'
     }).then(() => fetchSensors()).catch(console.error);
+  };
+
+  const handleDeleteSensor = async (id: string) => {
+    if (!window.confirm("Are you sure you want to decommission and delete this sensor?")) return;
+    try {
+      const res = await fetch(`/api/v1/sensors/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        toast.success("Sensor decommissioned successfully");
+        fetchSensors();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to delete sensor");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Network error");
+    }
   };
 
   const handleUpdateSensor = (id: string, payload: any) => {
@@ -200,12 +220,17 @@ export default function SensorsPage() {
                     {s.last_calibrated_at ? new Date(s.last_calibrated_at).toLocaleDateString() : 'Never'}
                   </td>
                   <td className="px-6 text-right">
-                    <button 
-                      onClick={() => handleCalibrate(s.id)}
-                      className="text-accent hover:text-accent-dark font-medium text-xs uppercase tracking-wide transition-colors"
-                    >
-                      Calibrate
-                    </button>
+                    <div className="flex items-center justify-end gap-3">
+                      <button 
+                        onClick={() => handleCalibrate(s.id)}
+                        className="text-accent hover:text-accent-dark font-medium text-xs uppercase tracking-wide transition-colors"
+                      >
+                        Calibrate
+                      </button>
+                      <button onClick={() => handleDeleteSensor(s.id)} className="text-text-muted hover:text-danger transition-colors p-1 rounded-md hover:bg-danger/10">
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

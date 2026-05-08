@@ -130,4 +130,16 @@ router.patch('/:id/calibrate', applyShipmentFilter, async (req, res) => {
   }
 });
 
+// DELETE /sensors/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const result = await query(`DELETE FROM sensors WHERE id = $1 RETURNING *`, [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Sensor not found' });
+    res.json({ message: 'Sensor decommissioned successfully', deleted: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

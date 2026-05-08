@@ -32,4 +32,19 @@ router.post('/', async (req, res) => {
   }
 });
 
+// DELETE /products/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const result = await query(`DELETE FROM products WHERE id = $1 RETURNING *`, [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
+    res.json({ message: 'Product deleted successfully', deleted: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    if (err.code === '23503') { // foreign key violation
+      return res.status(400).json({ error: 'Cannot delete product currently linked to shipments.' });
+    }
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Plus, Box } from "lucide-react";
+import { Plus, Box, Trash } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -47,6 +48,26 @@ export default function ProductsPage() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    try {
+      const res = await fetch(`/api/v1/products/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        toast.success("Product deleted successfully");
+        fetchProducts();
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to delete product");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Network error");
     }
   };
 
@@ -115,6 +136,9 @@ export default function ProductsPage() {
                     <p className="font-data text-xs text-text-secondary">{p.sku}</p>
                   </div>
                 </div>
+                <button onClick={() => handleDeleteProduct(p.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                  <Trash className="w-4 h-4" />
+                </button>
               </div>
               <div>
                 <p className="text-xs text-text-muted line-clamp-2 mb-4 h-8">{p.description || "No description provided."}</p>
