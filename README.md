@@ -80,10 +80,3 @@ project/
 ```
 
 ---
-
-## 5. Recent Production Stability Enhancements
-To transition the system from an MVP to a robust, production-grade tool, several key improvements have been integrated:
-* **Informative UX Feedback:** Native browser `alert()` calls were entirely replaced with `react-hot-toast`. Whether a shipment is successfully created, reinitialized, or an API request fails, the user gets non-blocking visual feedback.
-* **Graceful Error Handling:** Backend API routes were wrapped in comprehensive `try/catch` blocks. Detailed error messages are bubbled up to the frontend and displayed in the toasts (e.g., if a deletion fails due to database constraints, the frontend clearly states why).
-* **Safe Resource Cleanup:** The shipment deletion workflow was refactored to safely handle orphaned IoT sensors by detaching them rather than querying non-existent join tables, resolving previous silent failures.
-* **Trip Reinitialization:** Added the ability to recycle cancelled shipments back into the active pipeline, improving dispatcher efficiency.
