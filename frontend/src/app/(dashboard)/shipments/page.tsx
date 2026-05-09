@@ -5,6 +5,7 @@ import { Map, X, Download } from 'lucide-react';
 import NewShipmentModal from "@/components/NewShipmentModal";
 import TelemetryChart from "@/components/TelemetryChart";
 import toast from 'react-hot-toast';
+import { io } from "socket.io-client";
 
 export default function ShipmentsPage() {
   const [shipments, setShipments] = useState<any[]>([]);
@@ -14,6 +15,7 @@ export default function ShipmentsPage() {
   const [isLoadingList, setIsLoadingList] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [carriers, setCarriers] = useState<any[]>([]);
+  const [liveTemps, setLiveTemps] = useState<Record<string, number>>({});
 
   const fetchShipments = () => {
     setIsLoadingList(true);
@@ -35,6 +37,19 @@ export default function ShipmentsPage() {
       .then(res => res.json())
       .then(data => { if(Array.isArray(data)) setCarriers(data); })
       .catch(console.error);
+
+    const socket = io(``, { withCredentials: true });
+    
+    socket.on("telemetry_update", (data) => {
+      if (data.shipment_id && data.temperature !== undefined) {
+        setLiveTemps(prev => ({
+          ...prev,
+          [data.shipment_id]: data.temperature
+        }));
+      }
+    });
+
+    return () => { socket.disconnect(); };
   }, []);
 
   useEffect(() => {
@@ -173,9 +188,11 @@ export default function ShipmentsPage() {
                   <StatusPill status={s.status} />
                 </div>
                 
-                {/* Temporary placeholder for live temp */}
+                {/* Real-time live temp from socket */}
                 <div className="mb-4">
-                  <div className="font-data text-xl text-text-primary">--.-°C</div>
+                  <div className="font-data text-xl text-text-primary">
+                    {liveTemps[s.id] !== undefined ? `${liveTemps[s.id].toFixed(1)}°C` : '--.-°C'}
+                  </div>
                   <div className="text-sm mt-1">2h left</div>
                 </div>
 
